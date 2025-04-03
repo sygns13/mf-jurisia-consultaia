@@ -1,0 +1,47 @@
+<div class="chat-container">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h3>Asistente IA</h3>
+    </div>
+    <div class="sidebar-actions">
+        <button pButton label="Nuevo Chat" icon="pi pi-plus" (click)="newChat()" class="redbutton"></button>
+      <p-button label="Buscar" icon="pi pi-search" styleClass="p-button-text"></p-button>
+      <p-button label="Razona" icon="pi pi-comment" styleClass="p-button-text"></p-button>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="messages-container" #scrollContainer>
+      <!-- Estado inicial -->
+      <div class="empty-state" *ngIf="messages.length === 0">
+        <div class="empty-content">
+          <i class="pi pi-comments empty-icon"></i>
+          <h2>¿En qué puedo ayudarte?</h2>
+          <p>Pregunta lo que quieras</p>
+        </div>
+      </div>
+
+      <!-- Mensajes -->
+      <div *ngFor="let message of messages" 
+           class="message-bubble"
+           [class.user-message]="message.isUser"
+           [class.assistant-message]="!message.isUser">
+        <div class="message-content">
+          {{ message.content }}
+        </div>
+      </div>
+    </div>
+
+    <div class="input-container">
+      <textarea pInputTextarea 
+                [(ngModel)]="newMessage" 
+                placeholder="Escribe tu mensaje aquí..." 
+                rows="2"
+                class="message-input"
+                (keydown.enter)="sendMessage($event)"></textarea>
+      <p-button icon="pi pi-send" 
+                styleClass="p-button-rounded p-button-success send-button"
+                (onClick)="sendMessage()"></p-button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,1 @@
+export const environment = (window as any).__env as any;
