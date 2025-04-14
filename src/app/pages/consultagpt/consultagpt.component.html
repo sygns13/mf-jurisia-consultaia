@@ -15,7 +15,13 @@
       <!-- Estado inicial -->
       <div class="empty-state" *ngIf="messages.length === 0">
         <div class="empty-content">
-          <i class="pi pi-comments empty-icon"></i>
+<!--          <i class="pi pi-comments empty-icon"></i>-->
+          <object
+            data="assets/animations/ApuBot.svg"
+            type="image/svg+xml"
+            class="shrink-0 mx-auto"
+            style="height: 25rem;">
+          </object>
           <h2 style="font-size: 2.5rem">¿En qué puedo ayudarte?</h2>
           <p style="font-size: 1.5rem">Preguntame cualquier duda que tengas relacionada con el ámbito jurisdiccional.</p>
         </div>
