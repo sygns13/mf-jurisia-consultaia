@@ -1,7 +1,7 @@
 <div class="chat-container">
   <div class="sidebar">
     <div class="sidebar-header">
-      <h3>Asistente IA</h3>
+      <h3>Asistente Virtual</h3>
     </div>
     <div class="sidebar-actions">
         <button pButton label="Nuevo Chat" icon="pi pi-plus" (click)="newChat()" class="redbutton"></button>
@@ -32,10 +32,20 @@
            class="message-bubble"
            [class.user-message]="message.isUser"
            [class.assistant-message]="!message.isUser">
-        <div class="message-content">
-          {{ message.content }}
-        </div>
+          <div class="message-content"
+               [innerHTML]="message.content">
+          </div>
       </div>
+      <!-- loader -->
+      <div class="typing-loader" *ngIf="isTyping">
+        <object
+          data="assets/animations/ApuBotTyping.svg"
+          type="image/svg+xml"
+          class="typing-animation">
+        </object>
+      </div>
+
+
     </div>
 
     <div class="input-container">
