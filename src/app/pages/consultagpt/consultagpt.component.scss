@@ -1,11 +1,59 @@
-.redbutton{
-  background-color: #b00600!important;
-  border: 1px solid #f76969!important;
-  padding-bottom: 0.7rem!important;
-  padding-top: 0.7rem!important;
+:host ::ng-deep .p-paginator-page.p-paginator-page-selected {
+  background: #ef4444 !important;
+  color: white !important;
+  border: 1px solid #f76969 !important;
 }
 
+:host ::ng-deep .p-select:not(.p-disabled).p-focus {
+  border-color: #b00600 !important;
+  box-shadow: 0 0 0 0.2rem rgba(176, 6, 0, 0.25) !important; // opcional: sombra roja suave
+}
 
+:host ::ng-deep .p-select-option.p-select-option-selected {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+.redbutton {
+  background-color: #b00600 !important;
+  border: 1px solid #f76969 !important;
+  padding-bottom: 0.7rem !important;
+  padding-top: 0.7rem !important;
+  margin-bottom: 2rem !important;
+  color: white;
+  border-radius: 0.375rem;
+
+  &:hover {
+    background-color: #ef4444 !important;
+  }
+}
+.conversation-item {
+  background-color: #f1f5f9!important;
+  border: 1px solid #d7d7d7 !important;
+  color: black;
+  border-radius: 0.375rem;
+  text-align: left;
+  padding: 0.75rem;
+  margin-top: 0.45rem;
+  margin-bottom: 0.45rem;
+  cursor: pointer;
+  transition: background 0.3s;
+  font-size: 1.1rem;
+
+  &:hover {
+    background-color: rgb(224 228 233) !important;
+  }
+
+  small {
+    display: block;
+    font-size: 0.75rem;
+    color: rgb(221, 38, 38) !important;
+    margin-top: 0.25rem;
+  }
+}
+.sidebar{
+  width: 300px!important;
+}
  // chat.component.scss
 .chat-container {
   display: flex;
@@ -22,7 +70,7 @@
     flex-direction: column;
 
     .sidebar-header {
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
       h3 {
         color: #2c3e50;
         font-size: 1.5rem;
@@ -33,7 +81,7 @@
     .sidebar-actions {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      flex-grow: 1;
     }
   }
 

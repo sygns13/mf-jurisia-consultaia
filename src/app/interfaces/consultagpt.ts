@@ -38,7 +38,49 @@ export interface GptResponse {
     sessionUID: string;
     status: number;
   }
-  
+
+  export interface GptHistoryItem {
+    id: number;
+    sessionUID: string;
+    created: number;
+    roleUser: string;
+    roleContent: string;
+    fechaSend: string;
+    fechaResponse: string;
+    status: number;
+  }
+
+  export interface Pageable {
+    pageNumber: number;
+    pageSize: number;
+    offset: number;
+    paged: boolean;
+    unpaged: boolean;
+    sort: {
+      sorted: boolean;
+      unsorted: boolean;
+      empty: boolean;
+    };
+  }
+
+  export interface HistoryResponse {
+    content: GptHistoryItem[];
+    pageable: Pageable;
+    last: boolean;
+    totalPages: number;
+    totalElements: number;
+    size: number;
+    number: number;
+    sort: {
+      sorted: boolean;
+      unsorted: boolean;
+      empty: boolean;
+    };
+    first: boolean;
+    numberOfElements: number;
+    empty: boolean;
+  }
+
   export interface Configuration {
     id: number;
     serviceCode: string;
@@ -59,7 +101,7 @@ export interface GptResponse {
     updTimestamp: number | null;
     updUserId: number | null;
   }
-  
+
   // Opcional: Interface para el contexto de uso en componentes
   export interface ChatMessage {
     id: number;

@@ -1,19 +1,45 @@
 <div class="chat-container">
-  <div class="sidebar">
-    <div class="sidebar-header">
-      <h3>Asistente Virtual</h3>
-    </div>
-    <div class="sidebar-actions">
-        <button pButton label="Nuevo Chat" icon="pi pi-plus" (click)="newChat()" class="redbutton"></button>
-      <!--<p-button label="Buscar" icon="pi pi-search" styleClass="p-button-text"></p-button>
-      <p-button label="Razona" icon="pi pi-comment" styleClass="p-button-text"></p-button>-->
+  <div class="sidebar d-flex flex-column h-full">
+  <div class="sidebar-header">
+    <h3>Asistente Virtual</h3>
+  </div>
+
+  <!-- Cambia aquí: agregamos flex-grow para que esto ocupe todo el espacio -->
+  <div class="sidebar-actions flex-grow-1 d-flex flex-column">
+    <button pButton label="Nuevo Chat" icon="pi pi-plus" (click)="newChat()" class="redbutton"></button>
+
+    <div class="conversation-list mt-3 overflow-auto">
+      <h4>Conversaciones</h4>
+      <ul class="p-0 m-0 list-none">
+        <li *ngFor="let item of conversationHistory"
+            (click)="loadSession(item.sessionUID)"
+            class="conversation-item">
+          {{ item.roleUser || 'Consulta sin asunto' | slice:0:40 }}...
+           <!--<small>{{ item.fechaSend | date:'short' }}</small>-->
+        </li>
+      </ul>
     </div>
   </div>
+
+  <!-- Paginador queda abajo -->
+  <div class="p-2">
+    <p-paginator
+      [rows]="paginationInfo.pageSize"
+      [totalRecords]="paginationInfo.totalElements"
+      [first]="paginationInfo.currentPage * paginationInfo.pageSize"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      (onPageChange)="onPageChange($event)"
+      styleClass="paginator-danger">
+    </p-paginator>
+  </div>
+</div>
+
+
 
   <div class="main-content">
     <div class="messages-container" #scrollContainer>
       <!-- Estado inicial -->
-      <div class="empty-state" *ngIf="messages.length === 0">
+      <div class="empty-state" *ngIf="mostrarVistaInicial">
         <div class="empty-content">
           <object
             data="assets/animations/ApuBot.svg"
