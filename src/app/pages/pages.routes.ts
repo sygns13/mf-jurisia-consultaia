@@ -3,13 +3,13 @@ import { ConsultagptComponent } from './consultagpt/consultagpt.component';
 
 export const authRoutes: Routes = [
     {
-        path: '', redirectTo: 'chatgpt', pathMatch:'full'
+        path: '', redirectTo: 'apubot', pathMatch:'full'
     },
     {
         path: '',
         children: [
             {
-                path: 'chatgpt',
+                path: 'apubot',
                 component: ConsultagptComponent,
             },
             {

@@ -88,11 +88,6 @@
         border-radius: 1rem;
         animation: fadeIn 0.3s ease-in;
 
-        .message-content {
-          line-height: 1.5;
-          white-space: pre-wrap;
-        }
-
         &.user-message {
           background-color: #ef444436;
           margin-left: auto;
@@ -191,23 +186,23 @@
   }
 
   th, td {
-    border: 1px solid #000000!important; // Gris claro, puedes cambiarlo
-    padding: 0.75rem!important;
-    text-align: left!important;
-    vertical-align: top!important;
+    border: 1px solid #000000;
+    padding: 0.75rem;
+    text-align: left;
+    vertical-align: top;
   }
 
   th {
-    background-color: #86888a; // Color de encabezado
+    background-color: #86888a;
     font-weight: 600;
   }
 
   tr:nth-child(even) {
-    background-color: #f9fafb; // Rayado sutil
+    background-color: #f9fafb;
   }
 
   tr:hover {
-    background-color: #f1f5f9; // Hover sobre filas
+    background-color: #f1f5f9;
   }
 
   code {
@@ -224,4 +219,35 @@
     overflow-x: auto;
   }
 }
+
+:host ::ng-deep .message-content table,
+:host ::ng-deep .message-content th,
+:host ::ng-deep .message-content td {
+  border: 1px solid #000000;
+  padding: 0.75rem;
+  text-align: left;
+}
+:host ::ng-deep .message-content table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.95rem;
+}
+
+:host ::ng-deep .message-content th,
+:host ::ng-deep .message-content td {
+  border: 1px solid #000000;
+  padding: 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+:host ::ng-deep .message-content tr:first-child th {
+  background-color: #d4d4d4 !important;
+  font-weight: bold;
+}
+
+:host ::ng-deep .message-content tr:not(:first-child) td {
+  background-color: #ffffff !important;
+}
+
 
