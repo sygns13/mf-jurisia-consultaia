@@ -14,7 +14,8 @@ import { of } from 'rxjs';
 })
 export class LoginService {
 
-  private url: string = `${environment.API_GATEWAY_URL}/${environment.API_PATH_SECURITY}/auth/login`;
+  private loginUrl: string = `${environment.API_GATEWAY_URL}/${environment.API_PATH_SECURITY}/auth/login`;
+  private refreshUrl: string = `${environment.API_GATEWAY_URL}/${environment.API_PATH_SECURITY}/auth/refresh`;
 
   tokenData: IUserData | null = null;
 
@@ -29,12 +30,28 @@ export class LoginService {
 
   login(username: string, password: string) {
 
-    return this.http.post<any>(this.url, {
+    return this.http.post<any>(this.loginUrl, {
           grant_type: environment.AUTH_GRANT_TYPE,
           username: username,
           password: password,
           client_id: environment.AUTH_CLIENTID,
           client_secret: environment.AUTH_SECRET,
+        }).pipe(
+          map(res => res || of([]))
+        )
+  }
+
+  refreshToken() {
+
+    const refreshtoken = localStorage.getItem(btoa(environment.AUTH_REFRESH_TOKEN));
+    const username = localStorage.getItem(btoa(environment.AUTH_USERNAME_NAME));
+
+    return this.http.post<any>(this.refreshUrl, {
+          grant_type: environment.REFRESH_GRANT_TYPE,
+          username: username,
+          client_id: environment.AUTH_CLIENTID,
+          client_secret: environment.AUTH_SECRET,
+          refresh_token: refreshtoken,
         }).pipe(
           map(res => res || of([]))
         )

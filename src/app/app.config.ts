@@ -6,14 +6,15 @@ import Aura from '@primeng/themes/aura';
 import { providePrimeNG } from 'primeng/config';
 
 import { routes } from './app.routes';
-import { httpHeadersInterceptor } from './interceptors/http-headers.interceptor';
+//import { httpHeadersInterceptor } from './interceptors/http-headers.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }), 
     provideRouter(routes, withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }), withEnabledBlockingInitialNavigation()),
 
-    provideHttpClient(withFetch(), withInterceptors([httpHeadersInterceptor])),
+    //provideHttpClient(withFetch(), withInterceptors([httpHeadersInterceptor])),
+    provideHttpClient(withFetch()),
 
     provideAnimationsAsync(),
 
