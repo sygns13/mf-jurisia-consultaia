@@ -43,6 +43,7 @@ export class ConsultagptComponent {
   messageCount: number = 0;
   sessionChatGPT: string = '';
   isTyping: boolean = false;
+  loaderMessage: string = '';
   mostrarVistaInicial: boolean = true;
 
   conversationHistory: GptHistoryItem[] = [];
@@ -136,8 +137,8 @@ export class ConsultagptComponent {
 
       this.irequest = {} as IRequest;
       this.newMessage = '';
-
-      this.isTyping = true; // ⬅️ Activamos el loader desde ya
+      this.isTyping = true;
+      this.loaderMessage = 'Trabajando en ello...';
 
       if (!this.sessionChatGPT || this.sessionChatGPT !== '') {
         this.irequest.sessionUID = this.sessionChatGPT;
@@ -148,13 +149,16 @@ export class ConsultagptComponent {
         next: (response: GptResponse) => {
           if (response.status == 1) {
             this.sessionChatGPT = response.sessionUID;
-            this.typeMessage(response.roleContent); // Redacción progresiva
+            this.loaderMessage = 'Aquí tienes el resultado';
+            this.typeMessage(response.roleContent);
           } else {
-            this.isTyping = false; // por si falla
+            this.isTyping = false;
+            this.loaderMessage = '';
           }
         },
         error: () => {
-          this.isTyping = false; // en caso de error
+          this.isTyping = false;
+          this.loaderMessage = '';
         }
       });
     }
@@ -196,12 +200,13 @@ export class ConsultagptComponent {
     const interval = setInterval(() => {
       if (currentIndex < fullText.length) {
         rawContent += fullText[currentIndex];
-        message.content = marked(rawContent); // aplicar markdown
+        message.content = marked(rawContent);
         currentIndex++;
         this.scrollToBottom();
       } else {
         clearInterval(interval);
         this.isTyping = false;
+        this.loaderMessage = '';
       }
     }, delay);
   }
