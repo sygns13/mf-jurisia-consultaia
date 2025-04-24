@@ -134,7 +134,7 @@ export class ConsultagptComponent {
         content: this.newMessage,
         isUser: true
       });
-
+      this.mostrarVistaInicial = false;
       this.irequest = {} as IRequest;
       this.newMessage = '';
       this.isTyping = true;
@@ -151,6 +151,7 @@ export class ConsultagptComponent {
             this.sessionChatGPT = response.sessionUID;
             this.loaderMessage = 'Aquí tienes el resultado';
             this.typeMessage(response.roleContent);
+            this.loadConversationHistory();
           } else {
             this.isTyping = false;
             this.loaderMessage = '';
