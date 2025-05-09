@@ -67,7 +67,7 @@ export class ConsultagptComponent {
   }
 
   ngAfterViewChecked() {
-    this.scrollToBottom();
+    //this.scrollToBottom();
   }
 
   /*PARA HISTORICO DE CONVERSACIONES*/
@@ -116,7 +116,10 @@ export class ConsultagptComponent {
           }
         });
         // this.isTyping = false;
-        this.scrollToBottom();
+        //this.scrollToBottom();
+        setTimeout(() => {
+            this.scrollToBottom();
+        }, 500);
       },
       error: (err) => {
         // this.isTyping = false;
@@ -144,7 +147,9 @@ export class ConsultagptComponent {
         this.irequest.sessionUID = this.sessionChatGPT;
       }
       this.irequest.prompt = this.messages[this.messages.length - 1].content;
-
+      setTimeout(() => {
+            this.scrollToBottom();
+        }, 500);
       this.consultagptService.doConsultation(this.irequest).subscribe({
         next: (response: GptResponse) => {
           if (response.status == 1) {
