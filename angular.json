@@ -40,7 +40,8 @@
 						"scripts": [],
 						"main": "src/main.ts",
 						"extraWebpackConfig": "webpack.config.js",
-						"commonChunk": false
+            "commonChunk": false,
+            "webWorkerTsConfig": "tsconfig.worker.json"
 					},
 					"configurations": {
 						"production": {
@@ -115,7 +116,8 @@
 						"styles": [
 							"src/styles.scss"
 						],
-						"scripts": []
+            "scripts": [],
+            "webWorkerTsConfig": "tsconfig.worker.json"
 					}
 				}
 			}

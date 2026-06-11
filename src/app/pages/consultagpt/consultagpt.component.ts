@@ -45,6 +45,8 @@ export class ConsultagptComponent {
   isTyping: boolean = false;
   loaderMessage: string = '';
   mostrarVistaInicial: boolean = true;
+  private typewriterWorker: Worker | null = null;
+
 
   conversationHistory: GptHistoryItem[] = [];
   paginationInfo = {
@@ -198,22 +200,48 @@ export class ConsultagptComponent {
   private typeMessage(fullText: string, delay: number = 20): void {
     const message: ChatMessage = { content: '', isUser: false };
     this.messages.push(message);
-
     this.isTyping = true;
-
-    let rawContent = '';
-    let currentIndex = 0;
-    const interval = setInterval(() => {
-      if (currentIndex < fullText.length) {
-        rawContent += fullText[currentIndex];
-        message.content = marked(rawContent);
-        currentIndex++;
-        this.scrollToBottom();
-      } else {
-        clearInterval(interval);
-        this.isTyping = false;
-        this.loaderMessage = '';
+  
+    if (typeof Worker !== 'undefined') {
+      // Usa el Web Worker
+      if (!this.typewriterWorker) {
+        this.typewriterWorker = new Worker(new URL('./typewriter.worker.ts', import.meta.url), { type: 'module' });
+        
+        // this.typewriterWorker = new Worker(new URL('./typewriter.worker', import.meta.url), { type: 'module' });
       }
-    }, delay);
+  
+      this.typewriterWorker.onmessage = ({ data }) => {
+        if (data === '[END]') {
+          this.isTyping = false;
+          this.loaderMessage = '';
+          return;
+        }
+  
+        message.content = marked(data);
+        this.scrollToBottom();
+      };
+  
+      this.typewriterWorker.postMessage({ text: fullText, delay });
+    } else {
+      // Fallback si el navegador no soporta Workers
+      this.fallbackTypeMessage(fullText, delay, message);
+    }
   }
+  
+  
+  private async fallbackTypeMessage(fullText: string, delay: number, message: ChatMessage) {
+    let rawContent = '';
+    for (let i = 0; i < fullText.length; i++) {
+      rawContent += fullText[i];
+      message.content = marked(rawContent);
+      this.scrollToBottom();
+      await this.delayText(delay);
+    }
+    this.isTyping = false;
+    this.loaderMessage = '';
+  }
+  private delayText(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+  
 }
