@@ -1,113 +1,94 @@
-export interface IRequest {
-    sessionUID: string;
-    prompt: string;
+// ============================================================================
+//  Contratos del microservicio ms-jurisia-consultaia  (módulo Gemini Chat)
+//  Endpoints: /gemini-chat/consulta (multipart), /gemini-chat/list,
+//             /gemini-chat/conversacion
+//  Todas las respuestas viajan envueltas en ApiResponse<T>.
+// ============================================================================
+
+/** Envoltura estándar de todas las respuestas del microservicio. */
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string | null;
+  result: T;
+  time: number;
 }
 
-// interfaces/gpt-response.interface.ts
+/**
+ * Adjunto de un turno: archivo subido por el usuario y almacenado en GCS.
+ * (La respuesta de la IA siempre es texto; estos archivos son solo del usuario.)
+ */
+export interface GeminiChatFile {
+  id: number;
+  geminiChatId: number;
+  sessionUID: string;
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  gcsUri: string;
+  fechaReg: string;
+  status: number;
+}
 
-export interface GptResponse {
-    id: number;
-    userId: number;
-    model: string;
-    roleSystem: string;
-    roleUser: string;
-    temperature: number;
-    fechaSend: string;
-    fechaResponse: string;
-    idGpt: string;
-    object: string;
-    created: number;
-    modelResponse: string;
-    roleResponse: string;
-    roleContent: string;
-    refusal: string | null;
-    logprobs: any | null; // Usar tipo específico si se conoce la estructura
-    finishReason: string;
-    promptTokens: number;
-    completionTokens: number;
-    totalTokens: number;
-    cachedTokens: number;
-    audioTokens: number;
-    completionReasoningTokens: number;
-    completionAudioTokens: number;
-    completionAceptedTokens: number;
-    completionRejectedTokens: number;
-    serviceTier: string;
-    systemFingerprint: string;
-    configurations: Configuration;
-    sessionUID: string;
-    status: number;
-  }
+/** Turno de conversación con Gemini. Respuesta de /consulta y de /conversacion. */
+export interface ResponseGeminiChat {
+  id: number;
+  userId: number;
+  model: string;
+  roleSystem: string;
+  /** Mensaje escrito por el usuario. */
+  prompt: string;
+  temperature: number;
+  fechaSend: string;
+  fechaResponse: string;
+  /** Respuesta de la IA (texto / markdown). */
+  response: string;
+  timeSeconds: number;
+  sessionUID: string;
+  status: number;
+  /** 1 = el turno incluyó adjuntos. */
+  hasFiles: number;
+  configurationsId: number;
+  /** Adjuntos del turno (nombre, mime, tamaño y URI gs://). */
+  files: GeminiChatFile[];
+  sedes?: any[];
+}
 
-  export interface GptHistoryItem {
-    id: number;
-    sessionUID: string;
-    created: number;
-    roleUser: string;
-    roleContent: string;
-    fechaSend: string;
-    fechaResponse: string;
-    status: number;
-  }
+/**
+ * Item del listado de conversaciones (entidad GeminiChats: primer turno de
+ * cada sessionUID). El `prompt` se usa como título de la conversación.
+ */
+export interface GeminiChatItem {
+  id: number;
+  userId: number;
+  model: string;
+  prompt: string;
+  response: string;
+  fechaSend: string;
+  fechaResponse: string;
+  sessionUID: string;
+  status: number;
+  hasFiles: number;
+}
 
-  export interface Pageable {
-    pageNumber: number;
-    pageSize: number;
-    offset: number;
-    paged: boolean;
-    unpaged: boolean;
-    sort: {
-      sorted: boolean;
-      unsorted: boolean;
-      empty: boolean;
-    };
-  }
+export interface Pageable {
+  pageNumber: number;
+  pageSize: number;
+  offset: number;
+  paged: boolean;
+  unpaged: boolean;
+  sort: { sorted: boolean; unsorted: boolean; empty: boolean };
+}
 
-  export interface HistoryResponse {
-    content: GptHistoryItem[];
-    pageable: Pageable;
-    last: boolean;
-    totalPages: number;
-    totalElements: number;
-    size: number;
-    number: number;
-    sort: {
-      sorted: boolean;
-      unsorted: boolean;
-      empty: boolean;
-    };
-    first: boolean;
-    numberOfElements: number;
-    empty: boolean;
-  }
-
-  export interface Configuration {
-    id: number;
-    serviceCode: string;
-    model: string;
-    descripcion: string;
-    roleSystem: string;
-    promptDefault: string | null;
-    maxMessages: number;
-    temperature: number;
-    activo: number;
-    borrado: number;
-    regDate: string | null;
-    regDatetime: string | null;
-    regTimestamp: number | null;
-    regUserId: number | null;
-    updDate: string | null;
-    updDatetime: string | null;
-    updTimestamp: number | null;
-    updUserId: number | null;
-  }
-
-  // Opcional: Interface para el contexto de uso en componentes
-  export interface ChatMessage {
-    id: number;
-    userQuestion: string;
-    assistantResponse: string;
-    timestamp: string;
-    legalReferences: string[];
-    status: 'pending' | 'completed' | 'error';
-  }
+/** Página genérica de Spring Data. */
+export interface Page<T> {
+  content: T[];
+  pageable: Pageable;
+  last: boolean;
+  totalPages: number;
+  totalElements: number;
+  size: number;
+  number: number;
+  first: boolean;
+  numberOfElements: number;
+  empty: boolean;
+}

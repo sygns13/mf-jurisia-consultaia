@@ -13,9 +13,12 @@
         <ul class="p-0 m-0 list-none">
           <li *ngFor="let item of conversationHistory"
               (click)="loadSession(item.sessionUID)"
+              [class.active]="item.sessionUID === sessionChatGPT"
               class="conversation-item">
-            {{ item.roleUser || 'Consulta sin asunto' | slice:0:28 }}...
-            <br>
+            <span class="conversation-title">
+              <i *ngIf="item.hasFiles" class="pi pi-paperclip attach-hint"></i>
+              {{ (item.prompt || 'Consulta sin asunto') | slice:0:32 }}{{ (item.prompt || '').length > 32 ? '…' : '' }}
+            </span>
             <span class="date-label">{{ item.fechaSend | date:'dd/MM/yyyy, HH:mm' }}</span>
           </li>
         </ul>
@@ -36,8 +39,21 @@
   </div>
 
 
-  <div class="main-content" style="padding-top: 0px!important;">
-    <div class="messages-container" #scrollContainer>
+  <div class="main-content"
+       (dragover)="onDragOver($event)"
+       (dragleave)="onDragLeave($event)"
+       (drop)="onDrop($event)">
+
+    <!-- Overlay de arrastrar y soltar -->
+    <div class="drop-overlay" *ngIf="isDragging">
+      <div class="drop-overlay-inner">
+        <i class="pi pi-cloud-upload"></i>
+        <span>Suelta tus archivos aquí</span>
+        <small>PDF, imágenes, Word o texto</small>
+      </div>
+    </div>
+
+    <div class="messages-container" #scrollContainer (scroll)="onMessagesScroll()">
       <!-- Estado inicial -->
       <div class="empty-state" *ngIf="mostrarVistaInicial">
         <div class="empty-content">
@@ -45,10 +61,10 @@
             data="assets/animations/ApuBot.svg"
             type="image/svg+xml"
             class="shrink-0 mx-auto"
-            style="height: 25rem;">
+            style="height: 22rem;">
           </object>
           <h2 style="font-size: 2.5rem">¿En qué puedo ayudarte?</h2>
-          <p style="font-size: 1.5rem">Preguntame cualquier duda que tengas relacionada con el ámbito jurisdiccional.</p>
+          <p style="font-size: 1.5rem">Pregúntame cualquier duda del ámbito jurisdiccional. Ahora también puedes adjuntar documentos (PDF, imágenes, Word) para analizarlos.</p>
         </div>
       </div>
 
@@ -57,10 +73,39 @@
            class="message-bubble"
            [class.user-message]="message.isUser"
            [class.assistant-message]="!message.isUser">
-          <div class="message-content"
-               [innerHTML]="message.content">
-          </div>
+
+        <!-- Adjuntos del turno -->
+        <div class="attachments" *ngIf="message.files?.length">
+          <ng-container *ngFor="let file of message.files">
+            <!-- Miniatura para imágenes con preview disponible (adjuntos del turno actual) -->
+            <a *ngIf="file.isImage && file.previewUrl"
+               class="attachment-thumb"
+               [href]="file.previewUrl" target="_blank" rel="noopener"
+               [title]="file.fileName">
+              <img [src]="file.previewUrl" [alt]="file.fileName" />
+            </a>
+            <!-- Tarjeta para el resto de archivos (o imágenes del historial sin preview) -->
+            <div *ngIf="!(file.isImage && file.previewUrl)" class="attachment-card">
+              <i class="attachment-icon" [ngClass]="fileIcon(file.mimeType, file.fileName)"></i>
+              <div class="attachment-meta">
+                <span class="attachment-name" [title]="file.fileName">{{ file.fileName }}</span>
+                <span class="attachment-size" *ngIf="file.sizeBytes">{{ formatFileSize(file.sizeBytes) }}</span>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+
+        <div class="message-content"
+             *ngIf="message.content"
+             [innerHTML]="message.content">
+        </div>
+
+        <div class="stopped-note" *ngIf="message.interrumpido">
+          <i class="pi pi-ban"></i>
+          <span>{{ message.content ? 'Respuesta detenida' : 'Consulta detenida' }}</span>
+        </div>
       </div>
+
       <!-- loader -->
       <div class="typing-loader" *ngIf="isTyping">
         <object
@@ -72,22 +117,68 @@
           {{ loaderMessage }}
         </div>
       </div>
-
-
     </div>
 
-    <div class="input-container">
-      <textarea pInputTextarea
-                [(ngModel)]="newMessage"
-                placeholder="Escribe tu mensaje aquí..."
-                rows="2"
-                class="message-input"
-                (keydown.enter)="(!newMessage.trim() || isTyping) ? $event.stopPropagation() : sendMessage($event)"></textarea>
-      <p-button icon="pi pi-send"
-                styleClass="p-button-rounded p-button-danger send-button"
-                (onClick)="sendMessage()"
-                [disabled]="!newMessage.trim() || isTyping"
-                ></p-button>
+    <!-- Barra de entrada estilo Gemini -->
+    <div class="composer">
+      <!-- Vista previa de adjuntos seleccionados -->
+      <div class="selected-files" *ngIf="selectedFiles.length">
+        <div class="selected-chip" [class.image-chip]="item.isImage" *ngFor="let item of selectedFiles; let i = index">
+          <img *ngIf="item.previewUrl" class="chip-thumb" [src]="item.previewUrl" [alt]="item.file.name" />
+          <i *ngIf="!item.previewUrl" class="chip-icon" [ngClass]="fileIcon(item.file.type, item.file.name)"></i>
+          <span class="chip-name" [title]="item.file.name">{{ item.file.name }}</span>
+          <span class="chip-size">{{ formatFileSize(item.file.size) }}</span>
+          <button type="button" class="chip-remove" (click)="removeSelectedFile(i)" aria-label="Quitar archivo">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="composer-row">
+        <button type="button"
+                class="attach-button"
+                pTooltip="Adjuntar archivo (PDF, imagen, Word)"
+                tooltipPosition="top"
+                (click)="triggerFileInput()"
+                [disabled]="isTyping">
+          <i class="pi pi-paperclip"></i>
+        </button>
+
+        <input #fileInput type="file" multiple hidden
+               [attr.accept]="acceptAttr"
+               (change)="onFilesSelected($event)" />
+
+        <textarea pInputTextarea
+                  [(ngModel)]="newMessage"
+                  placeholder="Escribe tu mensaje o adjunta un documento…"
+                  rows="1"
+                  class="message-input"
+                  (keydown.enter)="(!newMessage.trim() && !selectedFiles.length) || isTyping ? $event.preventDefault() : sendMessage($event)"></textarea>
+
+        <button type="button"
+                *ngIf="!isTyping"
+                class="send-button"
+                (click)="sendMessage()"
+                [disabled]="!newMessage.trim() && !selectedFiles.length"
+                aria-label="Enviar">
+          <i class="pi pi-send"></i>
+        </button>
+
+        <!-- Mientras se consulta o se redacta, el botón de enviar pasa a ser Detener. -->
+        <button type="button"
+                *ngIf="isTyping"
+                class="send-button stop-button"
+                (click)="detenerRespuesta()"
+                pTooltip="Detener respuesta"
+                tooltipPosition="top"
+                aria-label="Detener respuesta">
+          <i class="pi pi-stop-circle"></i>
+        </button>
+      </div>
+
+      <div class="composer-hint">La IA responde en texto. Puedes adjuntar varios archivos por consulta.</div>
     </div>
   </div>
 </div>
+
+<p-toast></p-toast>
