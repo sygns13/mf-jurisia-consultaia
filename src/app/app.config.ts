@@ -2,7 +2,7 @@ import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import Aura from '@primeng/themes/aura';
+import { ApuBotPreset } from './theme/apubot-preset';
 import { providePrimeNG } from 'primeng/config';
 
 import { routes } from './app.routes';
@@ -18,6 +18,6 @@ export const appConfig: ApplicationConfig = {
 
     provideAnimationsAsync(),
 
-    providePrimeNG({ theme: { preset: Aura, options: { darkModeSelector: '.app-dark' } } }),
+    providePrimeNG({ theme: { preset: ApuBotPreset, options: { darkModeSelector: '.app-dark' } } }),
   ]
 };
